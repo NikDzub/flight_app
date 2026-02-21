@@ -3,7 +3,6 @@ from fastapi import APIRouter, Query
 from app.services.locations_service import (
     search_locations,
     get_nearby_airports,
-    get_points_of_interest,
 )
 
 router = APIRouter()
