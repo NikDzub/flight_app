@@ -3,6 +3,26 @@ from amadeus import ResponseError
 from app.services.amadeus_client import amadeus
 
 
+def log_amadeus_error(e: ResponseError, context: str = ""):
+    """Log detailed Amadeus error information."""
+    status = getattr(e.response, "status_code", "N/A")
+    print(f"\n===== AMADEUS ERROR {context} =====")
+    print(f"STATUS CODE: {status}")
+    print("ERROR OBJECT:", e)
+
+    try:
+        print("FULL RESPONSE BODY:", e.response.body)
+    except Exception:
+        print("Could not access response body.")
+
+    try:
+        print("HEADERS:", e.response.headers)
+    except Exception:
+        print("Could not access headers.")
+
+    print("===================================\n")
+
+
 def search_flight_offers(origin, destination, departure_date, adults=1, max_offers=5):
     """Search for flight offers between origin and destination."""
     try:
@@ -15,23 +35,7 @@ def search_flight_offers(origin, destination, departure_date, adults=1, max_offe
         )
         return response.data
     except ResponseError as e:
-        # Print status code
-        status = getattr(e.response, "status_code", "N/A")
-        print(f"AMADEUS ERROR (Flight Offers Search): [{status}] {e}")
-
-        # Print full response body
-        try:
-            print("FULL RESPONSE BODY:", e.response.body)
-        except Exception:
-            print("Could not access response body.")
-
-        # Print headers
-        try:
-            print("HEADERS:", e.response.headers)
-        except Exception:
-            pass
-
-        # Return empty list or error info
+        log_amadeus_error(e, "Flight Offers Search")
         return []
 
 
@@ -41,7 +45,7 @@ def flight_offers_pricing(offer):
         response = amadeus.shopping.flight_offers.pricing.post(offer)
         return response.data
     except ResponseError as e:
-        print("AMADEUS ERROR (Flight Offers Pricing):", e)
+        log_amadeus_error(e, "Flight Offers Search")
         return []
 
 
@@ -53,21 +57,8 @@ def flight_dates(origin, destination, departure_date):
         )
         return response.data
     except ResponseError as e:
-        print("AMADEUS ERROR: [", getattr(e.response, "status_code", "N/A"), "]")
-
-        # Try to print full response body
-        try:
-            print("FULL RESPONSE BODY:", e.response.body)
-        except Exception:
-            print("Could not access response body.")
-
-        # Optional: print headers or other info
-        try:
-            print("HEADERS:", e.response.headers)
-        except Exception:
-            pass
-
-        return {"error": "Failed to retrieve flight dates from Amadeus"}
+        log_amadeus_error(e, "Flight Offers Search")
+        return []
 
 
 def flight_inspiration(origin, max_price=1000):
@@ -78,7 +69,8 @@ def flight_inspiration(origin, max_price=1000):
         )
         return response.data
     except ResponseError as e:
-        print("AMADEUS ERROR (Flight Inspiration):", e)
+        log_amadeus_error(e, "Flight Offers Search")
+
         return []
 
 
@@ -90,5 +82,5 @@ def search_airports(keyword):
         )
         return response.data
     except ResponseError as e:
-        print("AMADEUS ERROR (Airports):", e)
+        log_amadeus_error(e, "Flight Offers Search")
         return []

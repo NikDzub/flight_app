@@ -1,20 +1,15 @@
 import axios from 'axios';
 
-const API_BASE = 'http://127.0.0.1:8000'; // FastAPI backend
+const API = axios.create({
+  baseURL: 'http://127.0.0.1:8000',
+});
 
-export const getFlightOffers = async (
-  origin,
-  destination,
-  departureDate,
-  adults = 1,
-) => {
+export const getFlightOffers = async (params) => {
   try {
-    const response = await axios.get(`${API_BASE}/flights/offers`, {
-      params: { origin, destination, departure_date: departureDate, adults },
-    });
-    return response.data.data;
-  } catch (err) {
-    console.error('Error fetching flight offers:', err);
-    return [];
+    const response = await API.get('/flights/offers', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Flight API Error:', error);
+    return null;
   }
 };
